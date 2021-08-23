@@ -11,6 +11,7 @@ def jud_update():
     file.close()
     config = yaml.load(file_data, Loader=yaml.FullLoader)
     update_list = []
+    replace_time = 0
     for uid in config['info'].keys():
         # 当uid不是模板，且其有内容则检测更新
         if uid != 123456789 and config['info'][uid] != None:
