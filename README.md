@@ -33,7 +33,7 @@ https://github.com/azmiao/github_reminder
 
 其他：
 
-(自动推送监控的仓库更新)
+(自动推送监控的仓库更新，需要手动开启)
 ```
 ```
 一个例子:
