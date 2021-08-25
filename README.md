@@ -3,7 +3,7 @@
 
 插件后续将继续在 github 更新，欢迎提交 isuue 和 request
 
-其他功能慢慢开发，要摸鱼
+监控组织的功能后续会考虑更新，大概
 
 ## 更新日志
 
@@ -35,20 +35,13 @@ https://github.com/azmiao/github_reminder
 
 (自动推送监控的仓库更新，需要手动开启)
 ```
-```
-一个例子:
 
-监控仓库 https://github.dihe.moe/pcrbot/HoshinoBot-plugins-index
-
-这将监控 这个地核镜像站的插件索引目录
-然后再手动开启github_reminder_poller就会有推送了
-```
 
 ## 简单食用教程：
 
 可看下方链接（还没写）：
 
-https://www.594594.xyz/2021/08/24/github_reminder_for_hoshino/
+~~https://www.594594.xyz/2021/08/24/github_reminder_for_hoshino/~~
 
 或本页面：
 
