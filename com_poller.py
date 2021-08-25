@@ -24,13 +24,13 @@ def jud_update():
                 # 获取该url和文件中存着的最新时间
                 url = dep_info['url']
                 init_time = dep_info['priv_time']
-                init_time = datetime.strptime(init_time,"%Y-%m-%d %H:%M:%S")
+                init_time = datetime.strptime(str(init_time),"%Y-%m-%d %H:%M:%S")
                 # 获取github上commit的最新时间
                 html = get_comHtml(url)
                 link_list, n = get_commits(html)  
                 # link_list[0]就是第一个的时间
                 priv_time = link_list[0]['com_time']
-                priv_time = datetime.strptime(priv_time,"%Y-%m-%d %H:%M:%S")
+                priv_time = datetime.strptime(str(priv_time),"%Y-%m-%d %H:%M:%S")
                 replace_time = priv_time
                 # 比较两个时间，来判断是否有更新
                 if priv_time > init_time:
@@ -41,7 +41,7 @@ def jud_update():
                     for m in range(len(link_list)):
                         # 这个时间就是每个commit的时间了
                         priv_time = link_list[m]['com_time']
-                        priv_time = datetime.strptime(priv_time,"%Y-%m-%d %H:%M:%S")
+                        priv_time = datetime.strptime(str(priv_time),"%Y-%m-%d %H:%M:%S")
                         # 再拿这个时间和前面的文件时间比较
                         if priv_time > init_time:
                             # 说明这一条commit是在文件时间之后的
