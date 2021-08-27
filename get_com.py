@@ -29,9 +29,12 @@ def get_commits(html):
             all_a_lable.remove(a_lable)
     # 对所有a标签进行检索，获取相关信息
     for a_lable in all_a_lable:
-        if a_lable.get('class') == ['Link--primary', 'text-bold', 'js-navigation-open', 'markdown-title']:
+        if a_lable.get('class') == ['Link--primary', 'text-bold', 'js-navigation-open', 'markdown-title'] and a_lable.string != 'Merge pull request':
             # commit时的标题
-            com_str = a_lable.string
+            if a_lable.string.startswith('from '):
+                com_str = 'Merge pull request: ' + a_lable.string
+            else:
+                com_str = a_lable.string
             # commit的时间
             p0 = a_lable.get('href')
             other_list = re.findall(rf'{p0}.+?datetime="', str(html))

@@ -42,3 +42,18 @@ def unwatch_depo(uid, url):
     url = url.replace('/commits', '')
     msg = f'成功取消监控仓库：{url}'
     return msg
+
+def query_depo(uid):
+    current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
+    file = open(current_dir, 'r', encoding="UTF-8")
+    file_data = file.read()
+    file.close()
+    config = yaml.load(file_data, Loader=yaml.FullLoader)
+    if len(config['info'][uid]) == 0:
+        msg = '您暂未监控任何仓库呢！'
+    else:
+        msg = '您所监控的仓库有：'
+        for info_data in config['info'][uid]:
+            url = info_data['url'].replace('/commits','')
+            msg = msg + f'\n{url}'
+    return msg

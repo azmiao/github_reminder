@@ -16,6 +16,8 @@ sv_help = '''命令如下：
 
 [不要监控 仓库链接] 不再监控该仓库
 
+[查询监控仓库] 查询自己监控的仓库列表
+
 其他：
 
 (自动推送监控的仓库更新)'''.strip()
@@ -29,6 +31,7 @@ svup = Service('github_reminder_poller', enable_on_default=False)
 async def help(bot, ev):
     await bot.send(ev, sv_help)
 
+# 直接查询某仓库
 @sv.on_prefix('查仓库')
 async def search_depo(bot, ev):
     uid = ev['user_id']
@@ -40,6 +43,7 @@ async def search_depo(bot, ev):
     msg = create_msg(url)
     await bot.send(ev, msg)
 
+# 监控
 @sv.on_prefix('监控仓库')
 async def watch_dep(bot, ev):
     uid = ev['user_id']
@@ -51,6 +55,7 @@ async def watch_dep(bot, ev):
         msg = '未知错误！监控失败！'
     await bot.send(ev, msg)
 
+# 取消监控
 @sv.on_prefix('不要监控')
 async def unwatch_dep(bot, ev):
     uid = ev['user_id']
@@ -62,6 +67,17 @@ async def unwatch_dep(bot, ev):
         msg = '取消监控失败！请确保你已监控该仓库，或请稍等一分钟再试一次'
     await bot.send(ev, msg)
 
+# 查询监控仓库
+@sv.on_fullmatch('查询监控仓库')
+async def query_watched(bot, ev):
+    uid = ev['user_id']
+    try:
+        msg = query_depo(uid)
+    except:
+        msg = '查询失败，请稍后再试'
+    await bot.send(ev, msg)
+
+# 推送commits更新
 @svup.scheduled_job('cron', minute='*/5')
 async def depo_commit_poller():
     update_list, replace_time = jud_update()
