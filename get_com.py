@@ -13,9 +13,12 @@ from datetime import timedelta
 
 # 返回commits界面的源码
 def get_comHtml(url):
-    req = urllib.request.Request(url)
-    webpage = urllib.request.urlopen(req)
-    html = webpage.read()
+    try:
+        req = urllib.request.Request(url)
+        webpage = urllib.request.urlopen(req, timeout=(5,10))
+        html = webpage.read()
+    except:
+        html = '链接超时！请尝试使用镜像站或稍后尝试'
     return html
 
 # 返回commits的信息
@@ -71,6 +74,8 @@ def change_time(raw_time):
 # 生成消息文本
 def create_msg(url):
     html = get_comHtml(url)
+    if html == '链接超时！请尝试使用镜像站或稍后尝试':
+        return html
     link_list, n = get_commits(html)
     msg = f'仓库{url}最近{n+1}次commit如下：'
     for link in link_list:
