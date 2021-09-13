@@ -5,17 +5,11 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from datetime import timedelta
 
-
-# 获取仓库链接,暂时用不到，branch可选，以后要用再说
-# def get_url(depo_owner, depo_name, branch):
-#     url = f'https://github.com/{depo_owner}/{depo_name}/commits/{branch}'
-#     return url, depo_name
-
 # 返回commits界面的源码
 def get_comHtml(url):
     try:
         req = urllib.request.Request(url)
-        webpage = urllib.request.urlopen(req, timeout=(5,10))
+        webpage = urllib.request.urlopen(req, timeout=10)
         html = webpage.read()
     except:
         html = '链接超时！请尝试使用镜像站或稍后尝试'
@@ -25,6 +19,7 @@ def get_comHtml(url):
 def get_commits(html):
     soup = BeautifulSoup(html, 'html.parser')
     link_list = []
+    n = 0
     all_a_lable = soup.find_all('a')
     # 去除无用的a标签
     for a_lable in all_a_lable:
