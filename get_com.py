@@ -1,4 +1,3 @@
-import requests
 import re
 import urllib.request
 from bs4 import BeautifulSoup
@@ -27,12 +26,35 @@ def get_commits(html):
             all_a_lable.remove(a_lable)
     # 对所有a标签进行检索，获取相关信息
     for a_lable in all_a_lable:
-        if a_lable.get('class') == ['Link--primary', 'text-bold', 'js-navigation-open', 'markdown-title'] and a_lable.string != 'Merge pull request':
+        if a_lable.get('class') == ['Link--primary', 'text-bold', 'js-navigation-open', 'markdown-title'] and a_lable.string != 'Merge pull request' and a_lable.string != ')':
             # commit时的标题
-            if a_lable.string.startswith('from '):
-                com_str = 'Merge pull request: ' + a_lable.string
+            # 判断string是否为空，为空就取text文本
+            if a_lable.string != None:
+                # 判断merge pull的情况
+                if a_lable.string.startswith('from '):
+                    com_str = 'Merge pull request: ' + a_lable.string
+                # 判断 issue的编号
+                elif a_lable.string.endswith(' ('):
+                    # print(str(a_lable))
+                    a_lable_t = str(a_lable).replace('(', '\(')
+                    a_lable_t = a_lable_t.replace('/', '\/')
+                    a_lable_temp = re.findall(r'' + a_lable_t + r'.+?<\/a>', str(html))
+                    # print(str(a_lable_temp))
+                    if a_lable_temp != []:
+                        a_lable_temp = a_lable_temp[0]
+                        a_lable_temp = a_lable_temp.replace(f'{a_lable}', '')
+                        soup_do = BeautifulSoup(str(a_lable_temp), 'html.parser')
+                        down_a_lable = soup_do.find('a')
+                        issue_str = ''
+                        if down_a_lable.get('class') == ['issue-link', 'js-issue-link']:
+                            issue_str = down_a_lable.string
+                        com_str = a_lable.string + 'issue ' + issue_str + ')'
+                # 正常情况
+                else:
+                    com_str = a_lable.string
+            # 非正常情况，可能其中有<code></code>时使用text
             else:
-                com_str = a_lable.string
+                com_str = a_lable.text
             # commit的时间
             p0 = a_lable.get('href')
             other_list = re.findall(rf'{p0}.+?datetime="', str(html))
