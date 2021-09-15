@@ -47,9 +47,9 @@ https://github.com/azmiao/github_reminder
 
 ## 简单食用教程：
 
-可看下方链接（还没写）：
+可看下方链接：
 
-~~https://www.594594.xyz/2021/08/24/github_reminder_for_hoshino/~~
+https://www.594594.xyz/2021/08/23/github_reminder_for_hoshino/
 
 或本页面：
 
