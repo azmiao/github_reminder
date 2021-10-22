@@ -80,7 +80,11 @@ async def query_watched(bot, ev):
 # 推送commits更新
 @svup.scheduled_job('cron', minute='*/5')
 async def depo_commit_poller():
-    update_list, replace_time = jud_update()
+    try:
+        update_list, replace_time = jud_update()
+    except:
+        svup.logger.info(f'检测commits更新失败，偶尔发生属于正常现象不用慌')
+        return
     flag = 0
     # 每个uid
     for all_info in update_list:
