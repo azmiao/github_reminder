@@ -63,7 +63,7 @@ def get_commits(html):
             com_time = com_time.replace(f'" class="no-wrap"', '')
             priv_time = str(change_time(com_time))
             # commit的作者
-            other_list_1 = re.findall(rf'{p0}.+?f6 color-text-secondary min-width-0">', str(html))
+            other_list_1 = re.findall(rf'{p0}.+?f6 color-fg-muted min-width-0">', str(html))
             another_list_1 = re.findall(rf'{p0}.+?committed', str(html))
             edit_html = another_list_1[0].replace(f'{other_list_1[0]}', '')
             edit_html = edit_html.replace(f'\n\n\n  committed', '')

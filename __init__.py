@@ -83,7 +83,7 @@ async def depo_commit_poller():
     try:
         update_list, replace_time = jud_update()
     except:
-        svup.logger.info(f'检测commits更新失败，偶尔发生属于正常现象不用慌')
+        svup.logger.info(f'检测commits更新失败，偶尔发生属于正常现象不用慌，经常发生请反馈bug')
         return
     flag = 0
     # 每个uid
