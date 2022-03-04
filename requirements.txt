@@ -1,0 +1,3 @@
+pyyaml
+datetime
+requests
