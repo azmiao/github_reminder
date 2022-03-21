@@ -11,6 +11,8 @@
 
 ## 更新日志
 
+22-03-21    v1.4.1  全部改为异步进行，[issue #6](https://github.com/azmiao/github_reminder/issues/6)
+
 21-11-09    v1.4    跟随github源码更新修复一个小bug，(github居然偷偷改源码了23333)
 
 21-09-14    v1.3    修复string中含有其他代码引发的报错(issue #1),并增加了查仓库issue编号的判断

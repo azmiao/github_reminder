@@ -40,7 +40,7 @@ async def search_depo(bot, ev):
         return
     url = ev.message.extract_plain_text()
     url = url + '/commits'
-    msg = create_msg(url)
+    msg = await create_msg(url)
     await bot.send(ev, msg)
 
 # 监控
@@ -50,7 +50,7 @@ async def watch_dep(bot, ev):
     url = ev.message.extract_plain_text()
     url = url + '/commits'
     try:
-        msg = watch_depo(uid, url)
+        msg = await watch_depo(uid, url)
     except:
         msg = '未知错误！监控失败！'
     await bot.send(ev, msg)
@@ -62,7 +62,7 @@ async def unwatch_dep(bot, ev):
     url = ev.message.extract_plain_text()
     url = url + '/commits'
     try:
-        msg = unwatch_depo(uid, url)
+        msg = await unwatch_depo(uid, url)
     except:
         msg = '取消监控失败！请确保你已监控该仓库，或请稍等一分钟再试一次'
     await bot.send(ev, msg)
@@ -72,7 +72,7 @@ async def unwatch_dep(bot, ev):
 async def query_watched(bot, ev):
     uid = ev['user_id']
     try:
-        msg = query_depo(uid)
+        msg = await query_depo(uid)
     except:
         msg = '查询失败，请稍后再试'
     await bot.send(ev, msg)
@@ -81,7 +81,7 @@ async def query_watched(bot, ev):
 @svup.scheduled_job('cron', minute='*/5')
 async def depo_commit_poller():
     try:
-        update_list, replace_time = jud_update()
+        update_list, replace_time = await jud_update()
     except:
         svup.logger.info(f'检测commits更新失败，偶尔发生属于正常现象不用慌，经常发生请反馈bug')
         return
@@ -97,8 +97,8 @@ async def depo_commit_poller():
                 url_tmp = url.replace('/commits', '')
                 msg = msg + f'\n◎您监控的{url_tmp}有如下commit更新：\n'
                 svup.logger.info(f'检测到{uid}监控的Url有commit更新！')
-                msg = msg + update_broadcast(all_info[url])
-                replace_info(uid, url, replace_time)
+                msg += await update_broadcast(all_info[url])
+                await replace_info(uid, url, replace_time)
             await svup.broadcast(msg, 'github_reminder-poller', 0.2)
     if flag == 0:
         svup.logger.info(f'暂未检测到commit更新')

@@ -4,7 +4,7 @@ from .get_com import *
 
 # 判断是否有更新并返回相应的数据
 # 以下注释是写给自己看的，当时没考虑好，导致for用的太多了，现在又不想改
-def jud_update():
+async def jud_update():
     current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
     file = open(current_dir, 'r', encoding="UTF-8")
     file_data = file.read()
@@ -26,8 +26,8 @@ def jud_update():
                 init_time = dep_info['priv_time']
                 init_time = datetime.strptime(str(init_time),"%Y-%m-%d %H:%M:%S")
                 # 获取github上commit的最新时间
-                html = get_comHtml(url)
-                link_list, n = get_commits(html)  
+                html = await get_comHtml(url)
+                link_list, n = await get_commits(html)  
                 # link_list[0]就是第一个的时间
                 priv_time = link_list[0]['com_time']
                 priv_time = datetime.strptime(str(priv_time),"%Y-%m-%d %H:%M:%S")
@@ -59,7 +59,7 @@ def jud_update():
     # 且data[url]里的数据个数大于等于1
     return update_list, replace_time
 
-def update_broadcast(all_info):
+async def update_broadcast(all_info):
     msg = f''
     for m in range(len(all_info)):
         com_time = all_info[str(m)]['com_time']
@@ -68,7 +68,7 @@ def update_broadcast(all_info):
         msg = msg + f'\n▲{com_time} {com_edit}提交了 "{com_str}"'
     return msg
 
-def replace_info(uid, url, replace_time):
+async def replace_info(uid, url, replace_time):
     current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
     file = open(current_dir, 'r', encoding="UTF-8")
     file_data = file.read()
@@ -89,5 +89,3 @@ def replace_info(uid, url, replace_time):
             config_tmp['info'][uid].append(data)
     with open(current_dir, "w", encoding="UTF-8") as f:
         yaml.dump(config_tmp, f,allow_unicode=True)
-
-

@@ -1,25 +1,25 @@
 import re
 import os
 import json
-import requests
+from hoshino import aiorequests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from datetime import timedelta
 
 # 返回commits界面的源码
-def get_comHtml(url):
+async def get_comHtml(url):
     with open(os.path.join(os.path.dirname(__file__), 'account.json')) as fp:
         pinfo = json.load(fp)
     proxy = pinfo['proxy']
     try:
-        req = requests.get(url=url, proxies = proxy, timeout=20)
-        html = req.text
+        req = await aiorequests.get(url=url, proxies = proxy, timeout=20)
+        html = await req.text
     except:
-        '链接超时！请尝试使用镜像站或稍后尝试'
+        html = '链接超时！请尝试使用镜像站或稍后尝试'
     return html
 
 # 返回commits的信息
-def get_commits(html):
+async def get_commits(html):
     soup = BeautifulSoup(html, 'html.parser')
     link_list = []
     n = 0
@@ -68,7 +68,7 @@ def get_commits(html):
             another_msg = re.search(another_msg_pattern, str(html)).group()
             com_time = another_msg.replace(f'{other_msg}', '')
             com_time = com_time.replace(f'" class="no-wrap"', '')
-            priv_time = str(change_time(com_time))
+            priv_time = str(await change_time(com_time))
             # commit的作者
             other_msg_1_pattern = re.compile(f'{p0}[\s\S]+?f6 color-fg-muted min-width-0">')
             other_msg_1 = re.search(other_msg_1_pattern, str(html)).group()
@@ -90,7 +90,7 @@ def get_commits(html):
                 link_list.append(data)
     return link_list, n
 
-def change_time(raw_time):
+async def change_time(raw_time):
     raw_time = str(raw_time).replace('Z', '')
     txtfmt = raw_time[:10]+ " " + raw_time[11:19]
     dt = datetime.strptime(txtfmt,"%Y-%m-%d %H:%M:%S")
@@ -98,11 +98,11 @@ def change_time(raw_time):
     return priv_time
 
 # 生成消息文本
-def create_msg(url):
-    html = get_comHtml(url)
+async def create_msg(url):
+    html = await get_comHtml(url)
     if html == '链接超时！请尝试使用镜像站或稍后尝试':
         return html
-    link_list, n = get_commits(html)
+    link_list, n = await get_commits(html)
     msg = f'仓库{url}最近{n+1}次commit如下：'
     for link in link_list:
         com_time = link['com_time']

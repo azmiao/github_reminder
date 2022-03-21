@@ -2,7 +2,7 @@ import yaml
 import os
 from .get_com import *
 
-def watch_depo(uid, url):
+async def watch_depo(uid, url):
     current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
     file = open(current_dir, 'r', encoding="UTF-8")
     file_data = file.read()
@@ -10,8 +10,8 @@ def watch_depo(uid, url):
     config = yaml.load(file_data, Loader=yaml.FullLoader)
     if uid not in config['info'].keys():
         config['info'].setdefault(uid,[])
-    html = get_comHtml(url)
-    link_list, n = get_commits(html)
+    html = await get_comHtml(url)
+    link_list, n = await get_commits(html)
     priv_time = link_list[0]['com_time']
     data = {
         'url': url,
@@ -23,7 +23,7 @@ def watch_depo(uid, url):
     msg = f'成功监控仓库：{url}'
     return msg
 
-def unwatch_depo(uid, url):
+async def unwatch_depo(uid, url):
     current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
     file = open(current_dir, 'r', encoding="UTF-8")
     file_data = file.read()
@@ -43,7 +43,7 @@ def unwatch_depo(uid, url):
     msg = f'成功取消监控仓库：{url}'
     return msg
 
-def query_depo(uid):
+async def query_depo(uid):
     current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
     file = open(current_dir, 'r', encoding="UTF-8")
     file_data = file.read()
