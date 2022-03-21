@@ -3,6 +3,7 @@ from hoshino.util import FreqLimiter
 from .get_com import *
 from .watch import *
 from .com_poller import *
+import re
 
 _limtime = 10    # 单个人查询冷却时间（单位：喵）
 _flmt = FreqLimiter(_limtime)
@@ -39,7 +40,7 @@ async def search_depo(bot, ev):
         await bot.send(ev, f'请勿频繁操作，冷却时间为{_limtime}秒！', at_sender=True)
         return
     url = ev.message.extract_plain_text()
-    url = url + '/commits'
+    url = await get_true_commit_url(url)
     msg = await create_msg(url)
     await bot.send(ev, msg)
 
@@ -48,7 +49,7 @@ async def search_depo(bot, ev):
 async def watch_dep(bot, ev):
     uid = ev['user_id']
     url = ev.message.extract_plain_text()
-    url = url + '/commits'
+    url = await get_true_commit_url(url)
     try:
         msg = await watch_depo(uid, url)
     except:
@@ -60,7 +61,7 @@ async def watch_dep(bot, ev):
 async def unwatch_dep(bot, ev):
     uid = ev['user_id']
     url = ev.message.extract_plain_text()
-    url = url + '/commits'
+    url = await get_true_commit_url(url)
     try:
         msg = await unwatch_depo(uid, url)
     except:
@@ -94,7 +95,7 @@ async def depo_commit_poller():
             msg = f'[CQ:at,qq={uid}]\n'
             url_list = list(all_info.keys())[1:]
             for url in url_list:
-                url_tmp = url.replace('/commits', '')
+                url_tmp = await back_url(url)
                 msg = msg + f'\n◎您监控的{url_tmp}有如下commit更新：\n'
                 svup.logger.info(f'检测到{uid}监控的Url有commit更新！')
                 msg += await update_broadcast(all_info[url])

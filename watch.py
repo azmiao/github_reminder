@@ -39,7 +39,7 @@ async def unwatch_depo(uid, url):
             config_tmp['info'][uid].remove(data)
     with open(current_dir, "w", encoding="UTF-8") as f:
         yaml.dump(config, f,allow_unicode=True)
-    url = url.replace('/commits', '')
+    url = await back_url(url)
     msg = f'成功取消监控仓库：{url}'
     return msg
 
@@ -54,6 +54,26 @@ async def query_depo(uid):
     else:
         msg = '您所监控的仓库有：'
         for info_data in config['info'][uid]:
-            url = info_data['url'].replace('/commits','')
+            url = await back_url(info_data['url'])
             msg = msg + f'\n{url}'
     return msg
+
+# 获取真实commit的url链接
+async def get_true_commit_url(url):
+    url_pattern = re.compile(f'(https://github.com/\S+/\S+/)tree(/\S+)')
+    url_tmp = re.match(url_pattern, url)
+    if url_tmp:
+        url = url_tmp.group(1) + 'commits' + url_tmp.group(2)
+    else:
+        url += '/commits'
+    return url
+
+# 还原url链接
+async def back_url(url):
+    url_pattern = re.compile(f'(https://github.com/\S+/\S+/)commits(/\S+)')
+    url_tmp = re.match(url_pattern, url)
+    if url_tmp:
+        url = url_tmp.group(1) + 'tree' + url_tmp.group(2)
+    else:
+        url = url.replace('/commits','')
+    return url
