@@ -2,13 +2,13 @@ import yaml
 import os
 from .get_com import *
 
+current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
+
 # 判断是否有更新并返回相应的数据
 # 以下注释是写给自己看的，当时没考虑好，导致for用的太多了，现在又不想改
 async def jud_update():
-    current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
-    file = open(current_dir, 'r', encoding="UTF-8")
-    file_data = file.read()
-    file.close()
+    with open(current_dir, 'r', encoding="UTF-8") as f:
+        file_data = f.read()
     config = yaml.load(file_data, Loader=yaml.FullLoader)
     update_list = []
     replace_time = 0
@@ -69,10 +69,8 @@ async def update_broadcast(all_info):
     return msg
 
 async def replace_info(uid, url, replace_time):
-    current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
-    file = open(current_dir, 'r', encoding="UTF-8")
-    file_data = file.read()
-    file.close()
+    with open(current_dir, 'r', encoding="UTF-8") as f:
+        file_data = f.read()
     config = yaml.load(file_data, Loader=yaml.FullLoader)
     config_tmp = config
     for info_data in config['info'][uid]:

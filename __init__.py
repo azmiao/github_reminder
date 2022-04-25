@@ -3,7 +3,6 @@ from hoshino.util import FreqLimiter
 from .get_com import *
 from .watch import *
 from .com_poller import *
-import re
 
 _limtime = 10    # 单个人查询冷却时间（单位：喵）
 _flmt = FreqLimiter(_limtime)
@@ -19,11 +18,10 @@ sv_help = '''命令如下：
 
 [查询监控仓库] 查询自己监控的仓库列表
 
-其他：
+(自动推送监控的仓库更新)
+'''.strip()
 
-(自动推送监控的仓库更新)'''.strip()
-
-# 默认对所有群关闭
+# 默认对所有群关闭推送
 sv = Service('github_reminder', help_=sv_help, enable_on_default=True)
 svup = Service('github_reminder_poller', enable_on_default=False)
 

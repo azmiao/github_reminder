@@ -2,11 +2,11 @@ import yaml
 import os
 from .get_com import *
 
+current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
+
 async def watch_depo(uid, url):
-    current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
-    file = open(current_dir, 'r', encoding="UTF-8")
-    file_data = file.read()
-    file.close()
+    with open(current_dir, 'r', encoding="UTF-8") as f:
+        file_data = f.read()
     config = yaml.load(file_data, Loader=yaml.FullLoader)
     if uid not in config['info'].keys():
         config['info'].setdefault(uid,[])
@@ -24,10 +24,8 @@ async def watch_depo(uid, url):
     return msg
 
 async def unwatch_depo(uid, url):
-    current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
-    file = open(current_dir, 'r', encoding="UTF-8")
-    file_data = file.read()
-    file.close()
+    with open(current_dir, 'r', encoding="UTF-8") as f:
+        file_data = f.read()
     config = yaml.load(file_data, Loader=yaml.FullLoader)
     config_tmp = config
     for info_data in config['info'][uid]:
@@ -44,10 +42,8 @@ async def unwatch_depo(uid, url):
     return msg
 
 async def query_depo(uid):
-    current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
-    file = open(current_dir, 'r', encoding="UTF-8")
-    file_data = file.read()
-    file.close()
+    with open(current_dir, 'r', encoding="UTF-8") as f:
+        file_data = f.read()
     config = yaml.load(file_data, Loader=yaml.FullLoader)
     if len(config['info'][uid]) == 0:
         msg = '您暂未监控任何仓库呢！'
