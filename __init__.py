@@ -15,7 +15,7 @@ sv_help = '''命令如下：
 
 [监控仓库 仓库链接] 监控该仓库，推送功能需另外开启
 
-[不要监控 仓库链接] 不再监控该仓库
+[不要监控仓库 仓库链接] 不再监控该仓库
 
 [查询监控仓库] 查询自己监控的仓库列表
 
@@ -57,7 +57,7 @@ async def watch_dep(bot, ev):
     await bot.send(ev, msg)
 
 # 取消监控
-@sv.on_prefix('不要监控')
+@sv.on_prefix('不要监控仓库')
 async def unwatch_dep(bot, ev):
     uid = ev['user_id']
     url = ev.message.extract_plain_text()
