@@ -1,89 +1,35 @@
-import yaml
-import os
-from .get_com import *
+import json
+import asyncio
+from datetime import datetime
 
-current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
+from .get_com import get_commits
+from .watch import current_dir
+from hoshino import logger
 
-# 判断是否有更新并返回相应的数据
-# 以下注释是写给自己看的，当时没考虑好，导致for用的太多了，现在又不想改
-async def jud_update():
+# 判断是否有更新并推送
+async def poller_update(bot):
     with open(current_dir, 'r', encoding="UTF-8") as f:
-        file_data = f.read()
-    config = yaml.load(file_data, Loader=yaml.FullLoader)
-    update_list = []
-    replace_time = 0
-    for uid in list(config['info'].keys()):
-        # 当uid不是模板，且其有内容则检测更新
-        if int(uid) != 123456789 and config['info'][uid] != None:
-            # 对每个uid创建一个data信息
-            data = {
-                'uid': uid
-            }
-            # 对每个uid分别检索每个监控的url
-            for dep_info in config['info'][uid]:
-                # 获取该url和文件中存着的最新时间
-                url = dep_info['url']
-                init_time = dep_info['priv_time']
-                init_time = datetime.strptime(str(init_time),"%Y-%m-%d %H:%M:%S")
-                # 获取github上commit的最新时间
-                html = await get_comHtml(url)
-                link_list, n = await get_commits(html)  
-                # link_list[0]就是第一个的时间
-                priv_time = link_list[0]['com_time']
-                priv_time = datetime.strptime(str(priv_time),"%Y-%m-%d %H:%M:%S")
-                replace_time = priv_time
-                # 比较两个时间，来判断是否有更新
-                if priv_time > init_time:
-                    # 判断出有更新了，所以在data下创建该url对应的空字典
-                    data.setdefault(url,{})
-                    # 既然有更新了，就得把在这5分钟内提交的commit全部弄出来
-                    # 获取这个url的前5个commit，因为可能他总共就不到5个，所以用len()
-                    for m in range(len(link_list)):
-                        # 这个时间就是每个commit的时间了
-                        priv_time = link_list[m]['com_time']
-                        priv_time = datetime.strptime(str(priv_time),"%Y-%m-%d %H:%M:%S")
-                        # 再拿这个时间和前面的文件时间比较
-                        if priv_time > init_time:
-                            # 说明这一条commit是在文件时间之后的
-                            # 所以在data[url]里加入内容和作者的信息
-                            data[url].setdefault(str(m), {})
-                            data[url][str(m)].setdefault('com_time', priv_time)
-                            data[url][str(m)].setdefault('com_str', link_list[m]['com_str'])
-                            data[url][str(m)].setdefault('com_edit', link_list[m]['com_edit'])
-                        # 如果没有就啥事不干，不过既然前面已经判断出有了，这里应该不可能没有了
-            # 将这个uid下的所有信息写入到update_list里
-            # 如果没有更新，那么这个data将是只有一个uid的字典
-            update_list.append(data)
-    # 返回的update_list是个有序list，里面每个元素都是data
-    # 那么，如果一个uid没有数据更新，则len(data.keys())=1，如果有就是2
-    # 且data[url]里的数据个数大于等于1
-    return update_list, replace_time
-
-async def update_broadcast(all_info):
-    msg = f''
-    for m in range(len(all_info)):
-        com_time = all_info[str(m)]['com_time']
-        com_str = all_info[str(m)]['com_str']
-        com_edit = all_info[str(m)]['com_edit']
-        msg = msg + f'\n▲{com_time} {com_edit}提交了 "{com_str}"'
-    return msg
-
-async def replace_info(uid, url, replace_time):
-    with open(current_dir, 'r', encoding="UTF-8") as f:
-        file_data = f.read()
-    config = yaml.load(file_data, Loader=yaml.FullLoader)
-    config_tmp = config
-    for info_data in config['info'][uid]:
-        if info_data['url'] == url:
-            data = {
-                'url': url,
-                'priv_time': info_data['priv_time']
-            }
-            config_tmp['info'][uid].remove(data)
-            data = {
-                'url': url,
-                'priv_time': replace_time
-            }
-            config_tmp['info'][uid].append(data)
-    with open(current_dir, "w", encoding="UTF-8") as f:
-        yaml.dump(config_tmp, f,allow_unicode=True)
+        file_data = json.load(f)
+    for gid in list(file_data.keys()):
+        for uid in list(file_data[gid].keys()):
+            if not file_data[gid][uid]: continue
+            msg = f'[CQ:at,qq={uid}]\n'
+            for url in list(file_data[gid][uid].keys()):
+                await asyncio.sleep(0.5)
+                old_time = datetime.strptime(file_data[gid][uid][url],"%Y-%m-%d %H:%M:%S")
+                data_list = await get_commits(url)
+                new_time = data_list[0]['time']
+                if new_time <= old_time: continue
+                msg += f'\n◎您监控的仓库{url}检测到如下commit更新：'
+                logger.info(f'检测到群{gid}的{uid}监控的仓库{url}有更新')
+                # 该URL更新了
+                for data in data_list:
+                    data_time = data['time']
+                    if data_time > old_time:
+                        msg += f'\n▲{data["time"]} {data["author"]}提交了 "{data["title"]}"'
+                # 替换监控信息的时间为最新commit时间
+                file_data[gid][uid][url] = str(new_time)
+            if msg != f'[CQ:at,qq={uid}]\n':
+                await bot.send_group_msg(group_id=gid, message=msg)
+    with open(current_dir, 'w', encoding="UTF-8") as f:
+        json.dump(file_data, f, indent=4, ensure_ascii=False)

@@ -1,75 +1,43 @@
-import yaml
 import os
-from .get_com import *
+import json
 
-current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
+from .get_com import get_commits
 
-async def watch_depo(uid, url):
+# 监控信息文件
+current_dir = os.path.join(os.path.dirname(__file__), 'config.json')
+
+# 监控
+async def watch_depo(gid, uid, url):
     with open(current_dir, 'r', encoding="UTF-8") as f:
-        file_data = f.read()
-    config = yaml.load(file_data, Loader=yaml.FullLoader)
-    if uid not in config['info'].keys():
-        config['info'].setdefault(uid,[])
-    html = await get_comHtml(url)
-    link_list, n = await get_commits(html)
-    priv_time = link_list[0]['com_time']
-    data = {
-        'url': url,
-        'priv_time': priv_time
-    }
-    config['info'][uid].append(data)
-    with open(current_dir, "w", encoding="UTF-8") as f:
-        yaml.dump(config, f,allow_unicode=True)
-    msg = f'成功监控仓库：{url}'
-    return msg
+        file_data = json.load(f)
+    group_info = file_data.get(gid, {})
+    user_info = group_info.get(uid, {})
+    if user_info.get(url, {}): return '你已经监控过该仓库了，无需再次监控'
+    data_list = await get_commits(url)
+    priv_time = str(data_list[0]['time'])
+    user_info[url] = priv_time
+    group_info[uid] = user_info
+    file_data[gid] = group_info
+    with open(current_dir, 'w', encoding="UTF-8") as f:
+        json.dump(file_data, f, indent=4, ensure_ascii=False)
+    return f'您已成功在群{gid}里监控仓库：{url}'
 
-async def unwatch_depo(uid, url):
+# 取消监控
+async def unwatch_depo(gid, uid, url):
     with open(current_dir, 'r', encoding="UTF-8") as f:
-        file_data = f.read()
-    config = yaml.load(file_data, Loader=yaml.FullLoader)
-    config_tmp = config
-    for info_data in config['info'][uid]:
-        if info_data['url'] == url:
-            data = {
-                'url': url,
-                'priv_time': info_data['priv_time']
-            }
-            config_tmp['info'][uid].remove(data)
-    with open(current_dir, "w", encoding="UTF-8") as f:
-        yaml.dump(config, f,allow_unicode=True)
-    url = await back_url(url)
-    msg = f'成功取消监控仓库：{url}'
-    return msg
+        file_data = json.load(f)
+    group_info = file_data.get(gid, {})
+    user_info = group_info.get(uid, {})
+    if not user_info.get(url, {}): return '你还未监控过该仓库，请先使用命令监控'
+    file_data[gid][uid].pop(url)
+    with open(current_dir, 'w', encoding="UTF-8") as f:
+        json.dump(file_data, f, indent=4, ensure_ascii=False)
+    return f'您已成功在群{gid}里取消监控仓库：{url}'
 
-async def query_depo(uid):
+# 监控查询
+async def query_depo(gid, uid):
     with open(current_dir, 'r', encoding="UTF-8") as f:
-        file_data = f.read()
-    config = yaml.load(file_data, Loader=yaml.FullLoader)
-    if len(config['info'][uid]) == 0:
-        msg = '您暂未监控任何仓库呢！'
-    else:
-        msg = '您所监控的仓库有：'
-        for info_data in config['info'][uid]:
-            url = await back_url(info_data['url'])
-            msg = msg + f'\n{url}'
-    return msg
-
-# 获取真实commit的url链接
-async def get_true_commit_url(url):
-    url_pattern = re.compile(f'(https://github.com/\S+/\S+/)tree(/\S+)')
-    url_tmp = re.match(url_pattern, url)
-    if url_tmp:
-        url = url_tmp.group(1) + 'commits' + url_tmp.group(2)
-    else:
-        url += '/commits'
-    return url
-
-# 还原url链接
-async def back_url(url):
-    url_pattern = re.compile(f'(https://github.com/\S+/\S+/)commits(/\S+)')
-    url_tmp = re.match(url_pattern, url)
-    if url_tmp:
-        url = url_tmp.group(1) + 'tree' + url_tmp.group(2)
-    else:
-        url = url.replace('/commits','')
-    return url
+        file_data = json.load(f)
+    group_info = file_data.get(gid, {})
+    user_info = group_info.get(uid, {})
+    return '您暂未监控任何仓库呢！' if not user_info else '您所监控的仓库有：\n' + '\n'.join(list(user_info.keys()))
