@@ -7,7 +7,7 @@
 
 ## 更新日志
 
-22-07-08    v2.0.0  删了原来的垃圾代码，重写了一份，因此需要删除`confg.yml`文件再更新，且需要重新监控仓库，试图解决[issue #8](https://github.com/azmiao/github_reminder/issues/8)
+22-07-08    v2.0.0  删了原来的垃圾代码，重写了一份，因此需要删除`config.yml`文件再更新，且需要重新监控仓库，试图解决[issue #8](https://github.com/azmiao/github_reminder/issues/8)
 
 22-03-21    v1.4.1  全部改为异步进行，[issue #6](https://github.com/azmiao/github_reminder/issues/6)
 
