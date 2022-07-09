@@ -5,6 +5,9 @@
 
 ※ 提交issue反馈bug麻烦提供日志，并说明清楚
 
+> 注：
+    你现在可以在不同群监控不同的仓库了，在哪监控的就只会在哪推送，人人均可监控，每个人均可监控多个,但每个群要推送消息记得先开启github_reminder_poller服务哦
+
 ## 更新日志
 
 22-07-08    v2.0.0  删了原来的垃圾代码，重写了一份，因此需要删除`config.yml`文件再更新，且需要重新监控仓库，试图解决[issue #8](https://github.com/azmiao/github_reminder/issues/8)
