@@ -29,10 +29,14 @@ async def get_commits(url):
     for block in block_list[:5]:
         if block.find('span', {"class": "hidden-text-expander inline"}):
             block.find('span', {"class": "hidden-text-expander inline"}).decompose()
+        try:
+            author = block.find('a', {"class": "commit-author user-mention"}).text
+        except:
+            author = block.find('span', {"class": "commit-author user-mention"}).text
         cur_time = await change_time(block.find('relative-time').get('datetime'))
         data_list.append({
             'title': block.find('p', {"class": "mb-1"}).text.strip(),
-            'author': block.find('a', {"class": "commit-author user-mention"}).text,
+            'author': author,
             'time': cur_time
         })
     return data_list
