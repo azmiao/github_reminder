@@ -25,7 +25,7 @@ async def get_commits(url):
     data_list = []
     resp = requests.get(url=url, proxies = proxy, timeout=20)
     soup = BeautifulSoup(resp.text, 'lxml')
-    block_list = soup.find_all('li', {"class": "Box-row Box-row--focus-gray mt-0 d-flex js-commits-list-item js-navigation-item js-socket-channel js-updatable-content"})
+    block_list = soup.find_all('li', {"class": re.compile("Box-row Box-row--focus-gray[\s\S]*?")})
     for block in block_list[:5]:
         if block.find('span', {"class": "hidden-text-expander inline"}):
             block.find('span', {"class": "hidden-text-expander inline"}).decompose()
