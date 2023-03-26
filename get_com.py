@@ -17,7 +17,7 @@ async def change_time(raw_time):
 async def get_commits(url):
     # 获取真实URL
     url_tmp = re.match(fr'(https://github.com/\S+/\S+/)tree(/\S+)', url)
-    url = url + '/commits' if not url_tmp else url_tmp.replace('tree', 'commits')
+    url = url + '/commits' if not url_tmp else url.replace('tree', 'commits')
     # 读取代理
     with open(os.path.join(os.path.dirname(__file__), 'account.json')) as fp:
         pinfo = json.load(fp)
