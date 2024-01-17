@@ -25,20 +25,18 @@ async def get_commits(url):
     data_list = []
     resp = requests.get(url=url, proxies = proxy, timeout=20)
     soup = BeautifulSoup(resp.text, 'lxml')
-    block_list = soup.find_all('li', {"class": re.compile("Box-row Box-row--focus-gray[\s\S]*?")})
-    for block in block_list[:5]:
-        if block.find('span', {"class": "hidden-text-expander inline"}):
-            block.find('span', {"class": "hidden-text-expander inline"}).decompose()
-        try:
-            author = block.find('a', {"class": "commit-author user-mention"}).text
-        except:
-            author = block.find('span', {"class": "commit-author user-mention"}).text
-        cur_time = await change_time(block.find('relative-time').get('datetime'))
-        data_list.append({
-            'title': block.find('p', {"class": "mb-1"}).text.strip(),
-            'author': author,
-            'time': cur_time
-        })
+    raw_info = json.loads(soup.text)
+    commit_infos_by_date = raw_info['payload']['commitGroups']
+    commit_counter = 0
+    for commit_info_by_date in commit_infos_by_date:
+        for commit_info in commit_info_by_date['commits']:
+            commit_message = commit_info['shortMessage']
+            authors_name = ','.join([info['displayName'] for info in commit_info['authors']])
+            time = await change_time(commit_info['committedDate'])
+            data_list.append({'title': commit_message, 'author': authors_name, 'time': time})
+            commit_counter += 1
+            if commit_counter >= 5:  # 如果要只取最近5次commit
+                return data_list
     return data_list
 
 # 生成消息文本
