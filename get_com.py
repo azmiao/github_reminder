@@ -1,17 +1,20 @@
-import re
-import os
 import json
+import os
+import re
+from datetime import datetime, timedelta
+
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+
 
 # 调整太平洋时间
 async def change_time(raw_time):
     raw_time = str(raw_time).replace('Z', '')
-    txtfmt = raw_time[:10]+ " " + raw_time[11:19]
-    dt = datetime.strptime(txtfmt,"%Y-%m-%d %H:%M:%S")
+    txt_fmt = raw_time[:10] + " " + raw_time[11:19]
+    dt = datetime.strptime(txt_fmt, "%Y-%m-%d %H:%M:%S")
     cur_time = dt + timedelta(hours=8)
     return cur_time
+
 
 # 返回commits的信息
 async def get_commits(url):
@@ -20,24 +23,24 @@ async def get_commits(url):
     url = url + '/commits' if not url_tmp else url.replace('tree', 'commits')
     # 读取代理
     with open(os.path.join(os.path.dirname(__file__), 'account.json')) as fp:
-        pinfo = json.load(fp)
-    proxy = pinfo['proxy']
+        p_info = json.load(fp)
+    proxy = p_info['proxy']
     data_list = []
-    resp = requests.get(url=url, proxies = proxy, timeout=20)
+    resp = requests.get(url=url, proxies=proxy, timeout=20)
     soup = BeautifulSoup(resp.text, 'lxml')
-    raw_info = json.loads(soup.text)
-    commit_infos_by_date = raw_info['payload']['commitGroups']
-    commit_counter = 0
-    for commit_info_by_date in commit_infos_by_date:
+    soup_find = soup.find('script', {'data-target': 'react-app.embeddedData'})
+    raw_info = json.loads(soup_find.text)
+    commit_info_list = raw_info['payload']['commitGroups']
+    for commit_info_by_date in commit_info_list:
         for commit_info in commit_info_by_date['commits']:
+            if len(data_list) >= 5:  # 如果要只取最近5次commit
+                break
             commit_message = commit_info['shortMessage']
             authors_name = ','.join([info['displayName'] for info in commit_info['authors']])
             time = await change_time(commit_info['committedDate'])
             data_list.append({'title': commit_message, 'author': authors_name, 'time': time})
-            commit_counter += 1
-            if commit_counter >= 5:  # 如果要只取最近5次commit
-                return data_list
     return data_list
+
 
 # 生成消息文本
 async def create_msg(url):
